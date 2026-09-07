@@ -11,11 +11,16 @@
 # so this picks once at launch. Subagent tiering is handled by the rule in
 # ~/.claude/CLAUDE.md instead, which is per task.
 
-_CA_RUBRIC='Classify the task prompt above into one tier.
-S = trivial: lookup, a question with a known answer, typo, rename, formatting, one obvious edit, status check, running a command.
-M = normal work: build or change a feature, fix a normal bug, write or edit copy and content, multi-file edits, research, code review.
-L = hard or high-stakes: architecture or design decisions, debugging already tried and failed, big refactors, security, money, legal or contract text, anything irreversible or customer-facing at scale.
-If torn between two tiers, pick the higher one. Reply with ONE letter only: S, M or L. Do not do the task.'
+_CA_RUBRIC='Classify the task prompt above into one tier. Reply with the tier code only.
+
+XS = a pure lookup or factual question with a known answer, a status check, one shell command, "what is X".
+S  = one trivial edit: typo, rename, reformat, a single obvious change.
+M  = normal work: build or change a feature, fix a normal bug, write or edit copy and content, multi-file edits, research, code review.
+L  = hard or high-stakes: architecture or design decisions, debugging already tried and failed, big refactors, security, money, legal or contract text, anything irreversible or customer-facing at scale.
+XL = reserve for work L clearly cannot carry: novel system design with no established answer, or a long multi-system build where one wrong early decision wastes days. Almost nothing is XL. If L could plausibly do it, answer L.
+
+If torn between two tiers, pick the higher one, except never reach for XL to break a tie.
+Reply with ONE of: XS, S, M, L, XL. Nothing else. Do not do the task.'
 
 # Prints S, M or L. Empty on any failure; callers treat that as L.
 _ca_tier() {
@@ -28,7 +33,7 @@ _ca_tier() {
   printf 'TASK PROMPT:\n"""\n%s\n"""\n\n%s' "$p" "$_CA_RUBRIC" \
     | "$launcher" -p --model haiku --effort low --setting-sources '' \
         --disable-slash-commands --strict-mcp-config --mcp-config '{"mcpServers":{}}' \
-        2>/dev/null | tr -d '[:space:]' | grep -oE '^[SML]$' || true
+        2>/dev/null | tr -d '[:space:]' | grep -oE '^(XS|XL|S|M|L)$' || true
 }
 
 # ponytail: unknown tier (incl. classifier failure) -> today's default, opus/high.
@@ -37,9 +42,13 @@ _ca_launch() {
   local tier model effort
   tier=$(_ca_tier "$*")
   case "$tier" in
-    S) model=sonnet     effort=low  ;;
-    M) model=sonnet     effort=high ;;
-    *) model=opus effort=high tier=L ;;
+    XS) model=haiku      effort=low   ;;
+    S)  model=sonnet     effort=low   ;;
+    M)  model=sonnet     effort=high  ;;
+    XL) model=fable      effort=xhigh ;;
+    # ponytail: unknown / classifier failure -> opus, never fable. A wrong L
+    # costs money, a wrong XL costs double, a wrong XS costs a redo.
+    *)  model=opus effort=high tier=L ;;
   esac
   print -P "%F{244}auto: ${tier} -> ${model} / ${effort}%f"
   _claude_stock --model "$model" --effort "$effort" "$@"
@@ -62,21 +71,22 @@ if ! (( $+functions[_claude_stock] )); then
 fi
 
 ca-test() {
-  local fails=0 got
+  local fails=0 n=0 got
   while IFS='|' read -r want prompt; do
-    got=$(_ca_tier "$prompt")
+    (( n++ )); got=$(_ca_tier "$prompt")
     if [[ "$got" == "$want" ]]; then print -P "%F{green}ok%f   $want  $prompt"
     else print -P "%F{red}MISS%f want=$want got=${got:-<empty>}  $prompt"; (( fails++ )); fi
   done <<'EOF'
-S|whats the git command to undo the last commit
+XS|whats the git command to undo the last commit
+XS|check what claude version im on
 S|fix the typo in the README
-S|check what claude version im on
+S|rename getUser to fetchUser in this file
 M|add a dark mode toggle to the settings page
 M|write me 5 instagram captions for the new challenge
 L|the checkout webhook silently drops events sometimes, ive tried 3 fixes already
 L|review the UZO risk disclosure clause 4 for enforceability
 L|should we use postgres or mongo for the affiliate ledger
 EOF
-  (( fails == 0 )) && print -P "%F{green}8/8 ok%f" || print -P "%F{red}$fails failed%f"
+  (( fails == 0 )) && print -P "%F{green}$n/$n ok%f" || print -P "%F{red}$fails failed%f"
   return $fails
 }

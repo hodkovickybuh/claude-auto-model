@@ -4,13 +4,14 @@ Auto-selects the Claude Code model and effort level from your prompt, so you sto
 opening every session on the top dial.
 
 ```
-claude "fix the typo in the README"           auto: S -> sonnet / low
-claude "write 5 instagram captions"           auto: M -> sonnet / high
-claude "postgres or mongo for the ledger"     auto: L -> opus / high
+claude "whats the git command to undo a commit"  auto: XS -> haiku / low
+claude "fix the typo in the README"             auto: S  -> sonnet / low
+claude "write 5 instagram captions"             auto: M  -> sonnet / high
+claude "postgres or mongo for the ledger"       auto: L  -> opus / high
 claude -c   |   claude --model opus "..."     passthrough, your flags win
 ```
 
-A Haiku call classifies the prompt (S/M/L, ~3s, well under a cent), then launches
+A Haiku call classifies the prompt (XS/S/M/L/XL, ~3s, well under a cent), then launches
 Claude Code on that tier. No API key needed, it uses your existing auth.
 
 ## Install
@@ -57,14 +58,22 @@ than anything here.
 
 ## Tiers
 
-| Tier | Model | Effort | For |
-|---|---|---|---|
-| S | sonnet | low | lookup, typo, rename, status check, one obvious edit |
-| M | sonnet | high | features, normal bugs, copy, research, review |
-| L | opus | high | architecture, failed debugging, security, money, legal |
+| Tier | Model | Effort | For | $/1M in-out |
+|---|---|---|---|---|
+| XS | haiku | low | pure lookup, factual question, status check, one command | $1 / $5 |
+| S | sonnet | low | typo, rename, reformat, one obvious edit | $2 / $10 |
+| M | sonnet | high | features, normal bugs, copy, research, review | $2 / $10 |
+| L | opus | high | architecture, failed debugging, security, money, legal | $5 / $25 |
+| XL | fable | xhigh | novel system design where L clearly cannot carry it | $10 / $50 |
 
-Unknown or a failed classification falls back to L. It never silently downgrades:
-a wrong L costs money, a wrong S costs a redo.
+**Fable is the most expensive model, not a cheaper one.** XL costs 2x L, so the
+rubric is written to make XL almost never fire. If nothing you do ever needs it,
+delete the XL case; if you want it more often, loosen the XL paragraph in
+`_CA_RUBRIC`. Either way rerun `ca-test`.
+
+Unknown or a failed classification falls back to **L**, never XL. It never silently
+downgrades and never silently doubles: a wrong L costs money, a wrong XL costs
+double, a wrong XS costs a redo.
 
 Edit `_CA_RUBRIC` in the script to retune, then rerun `ca-test`.
 
