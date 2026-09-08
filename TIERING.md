@@ -1,25 +1,25 @@
-# Subagent tiering rule
+# Automatic routing context
 
-Paste into `~/.claude/CLAUDE.md`. Subagent model/effort **is** settable per task,
-so this is the part that is genuinely automatic on every prompt.
+Your host selects the main model and reasoning effort before each user task.
+Continue doing the user's work normally. Do not ask the user to type model or
+effort commands just because the task changes. Respect explicit user choices.
 
----
+For a new Agent/Task invocation, describe its actual task clearly. The host's
+PreToolUse callback supplies a missing model and selects a general-purpose
+auto-* agent definition carrying its effort. Agent has no effort input field.
+Leave the optional model unset to use automatic routing. An explicit value
+is treated as an intentional override and preserved. Resumed subagents keep
+their existing configuration.
 
-## Model & effort tiering
+The tier ladder is Haiku for small lookups, Sonnet for routine work, Opus for
+difficult or high-stakes work, and Fable for exceptionally demanding engineering
+and reasoning. Haiku has no adaptive effort setting. Correctness takes priority
+over cost savings. Independent subtasks can use different models.
 
-Pick the cheapest tier that does the job. This is a standing rule, not a suggestion.
+For Workflow or other orchestration tools whose parameters are not covered by
+the Agent/Task callback, select an appropriate model and effort explicitly using
+that tool's actual schema. Never assume a tool accepts an undocumented field.
 
-**Subagents** (Agent tool `model`/`effort`, Workflow `opts.model`/`opts.effort`).
-Every time you spawn one, set its tier explicitly. Never let a search agent inherit Opus.
-
-| Subagent work | model | effort |
-|---|---|---|
-| Search, grep, file location, scraping, mechanical edits, format conversion | `haiku` | low |
-| Reading and summarising, drafting copy, routine code changes, tests, single-lens review | `sonnet` | medium |
-| Architecture, adversarial verify, security, legal or money-critical text, multi-file refactor | `opus` | high |
-
-If genuinely torn, take the higher tier. Correctness beats the saving.
-
-**Your own turn.** You cannot switch your own model. If the session tier is clearly
-wrong for the task, say so in one line and name the switch (`/model sonnet` + `/effort low`,
-or `/model opus` + `/effort high`).
+The host reports requested and applied routing settings. These are configuration
+choices, not a guarantee that a model will solve a task. All normal tool permission
+rules continue to apply.

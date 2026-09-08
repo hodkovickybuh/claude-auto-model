@@ -1,88 +1,189 @@
 # claude-auto-model
 
-Auto-selects the Claude Code model and effort level from your prompt, so you stop
-opening every session on the top dial.
+Automatically select Claude Code's model and effort before every task in the
+same conversation. Start `claude` once and keep chatting.
 
-```
-claude "whats the git command to undo a commit"  auto: XS -> haiku / low
-claude "fix the typo in the README"             auto: S  -> sonnet / low
-claude "write 5 instagram captions"             auto: M  -> sonnet / high
-claude "postgres or mongo for the ledger"       auto: L  -> opus / high
-claude -c   |   claude --model opus "..."     passthrough, your flags win
-```
-
-A Haiku call classifies the prompt (XS/S/M/L/XL, ~3s, well under a cent), then launches
-Claude Code on that tier. No API key needed, it uses your existing auth.
+This version replaces the original launch-only zsh classifier with a small
+Python terminal controller. It runs the real Claude Code engine continuously and
+uses its supported `set_model` and `apply_flag_settings` controls. The active
+model and effort are verified before your prompt is sent.
 
 ## Install
 
+Requires macOS or Linux, Python 3.10+, and Claude Code with a working login.
+Verified against Claude Code **2.1.263**. Run `ca-doctor` after CLI updates.
+
 ```sh
-git clone https://github.com/<you>/claude-auto-model ~/.claude-auto-model
-echo '[[ -f ~/.claude-auto-model/claude-auto-model.zsh ]] && source ~/.claude-auto-model/claude-auto-model.zsh' >> ~/.zshrc
+git clone https://github.com/hodkovickybuh/claude-auto-model.git
+cd claude-auto-model
+python3 -m unittest discover -v
+python3 install.py
 ```
 
-New shell, then `ca-test` to verify (8 known prompts must land on their tier).
+Open a new zsh terminal, then run `claude` normally. The installer archives your
+previous `.zshrc`, replaces the old router's source line if present, and leaves
+unrelated shell configuration intact. Re-running it is idempotent.
 
-Also paste [TIERING.md](TIERING.md) into `~/.claude/CLAUDE.md`. That half is the
-one that runs on every prompt, see below.
+Without installing:
 
-## Read this before you install it
+```sh
+python3 auto_model.py
+python3 auto_model.py "your first task"
+```
 
-**It routes at session launch, not per prompt.** If you open a bare `claude` and
-then chat inside the TUI, nothing is classified and nothing changes. You get
-routing only when the task is on the command line.
+The interface is plain text. Claude retains its session, tools, project
+instructions, hooks, plugins, MCPs, and normal permission rules. It is **not
+Claude's original full-screen terminal UI**. Native pickers, image pasting,
+terminal shortcuts, and other UI-only features remain available through
+`_claude_stock` or `ca --native`. This cannot attach automatic routing to an
+already-running original terminal session.
 
-**There is no way to change a running session's model automatically.** I checked:
+## Routing
 
-| Path | set model | set effort | reaches an interactive terminal session |
+| Tier | Default model | Effort | Work |
 |---|---|---|---|
-| You typing `/model` / `/effort` | yes | yes | yes, manually |
-| Control protocol `set_model` + `apply_flag_settings{effortLevel}` | yes | yes | SDK stream-json, Remote Control, or IDE only |
-| Hooks (`UserPromptSubmit`, ...) | no such field | no | no |
-| Anything the agent can call itself | no tool exists | no | no |
+| XS | Haiku | No adaptive effort setting | Small factual lookups |
+| S | Sonnet | low | Typos and obvious mechanical changes |
+| M | Sonnet | high | Normal features, debugging, research and content |
+| L | Opus | high | Difficult analysis, architecture, security, financial or legal work |
+| XL | Fable | xhigh | Novel systems, unresolved severe failures, exceptionally difficult reasoning |
 
-Rewriting `settings.json` from a hook takes effect on the *next* session, never the
-running one. `claude auto-mode` is the permission classifier, unrelated to model choice.
-Upstream request: [anthropics/claude-code#43326](https://github.com/anthropics/claude-code/issues/43326).
+On the tested CLI, the aliases resolve to Haiku 4.5, Sonnet 5, Opus 5 and
+Fable 5.1. Provider configuration, model availability and future CLI versions can
+change alias resolution.
 
-So the honest split:
+A separate tool-free Haiku request classifies each substantive task with bounded
+recent context and a retained active-task anchor. Status questions such as
+"are you workign?" and "pracujes?" are answered locally, with no inference or
+model change. "Yes continue" keeps the active model and effort without a
+classifier call. Uncertain follow-ups cannot automatically downgrade the active
+model; genuinely new tasks can. Fable is a real automatic choice.
 
-- **Per prompt, automatic:** subagent tiering, via `TIERING.md`. A grep agent stops
-  inheriting Opus. This is where most of the tokens are.
-- **Per session, automatic:** this script.
-- **Not available:** re-tiering a live session.
+Classification failures fall back to Opus/high, while preserving clear explicit
+model/effort directives. Automatic Haiku selection is avoided once observed
+conversation context reaches 160,000 tokens. Before a warm-cache downgrade, a
+one-turn heuristic compares estimated refill cost with expected output savings.
+It can keep the previous model at lower effort. The five-minute estimate uses
+published default-model prices, not provider billing or observed future output;
+custom model prices are not guessed. Manual choices bypass it.
 
-If you mostly chat inside long sessions rather than launching with a task, the
-script will rarely fire, and your default model in `settings.json` matters far more
-than anything here.
+Classification adds latency and consumes your normal Claude allowance or API
+credits. `/cost` shows Claude's current-run reported estimate separately from
+the accumulated cost of classifier calls. Failed classifier calls may have
+unreported spend. Model switches can invalidate prompt caches. This is task-based
+selection, not a guarantee that switching will always save money or that the
+classifier will always judge difficulty correctly.
 
-## Tiers
+## Manual choices
 
-| Tier | Model | Effort | For | $/1M in-out |
-|---|---|---|---|---|
-| XS | haiku | low | pure lookup, factual question, status check, one command | $1 / $5 |
-| S | sonnet | low | typo, rename, reformat, one obvious edit | $2 / $10 |
-| M | sonnet | high | features, normal bugs, copy, research, review | $2 / $10 |
-| L | opus | high | architecture, failed debugging, security, money, legal | $5 / $25 |
-| XL | fable | xhigh | novel system design where L clearly cannot carry it | $10 / $50 |
+```sh
+claude --model opus --effort max
+claude "your task" --model opus --effort max
+claude --continue
+claude --resume SESSION_ID
+```
 
-**Fable is the most expensive model, not a cheaper one.** XL costs 2x L, so the
-rubric is written to make XL almost never fire. If nothing you do ever needs it,
-delete the XL case; if you want it more often, loosen the XL paragraph in
-`_CA_RUBRIC`. Either way rerun `ca-test`.
+Model and effort flags are independent session pins. Both pinned means no
+classification is needed. Clear leading directives such as "Use Fable 5.1 at max
+effort for this task." are parsed before inference. With both choices present,
+the classifier is skipped. Other plain-language choices are recognized by the
+classifier. These overrides apply to that turn unless a session pin already
+fixes the setting. Quoted model names are not treated as commands.
 
-Unknown or a failed classification falls back to **L**, never XL. It never silently
-downgrades and never silently doubles: a wrong L costs money, a wrong XL costs
-double, a wrong XS costs a redo.
+Inside a routed session:
 
-Edit `_CA_RUBRIC` in the script to retune, then rerun `ca-test`.
+```text
+/model opus        Pin model
+/effort max        Pin effort
+/model auto        Release only the model pin
+/effort auto       Release only the effort pin
+/auto              Release both pins
+/status            Show applied settings, pins and session ID
+/models            Show the installation's advertised models
+/cost              Show reported engine and classifier cost, not promised savings
+/paste             Multi-line input, finish with a line containing only a dot
+/quit              Exit
+```
 
-## Notes
+Bracketed multi-line paste is accepted as one task on terminals that support it.
+Ctrl+C interrupts the current task. Permission requests display the actual tool
+input and require an explicit answer. Without an interactive terminal, requests
+needing approval are denied. Unknown host controls are never automatically
+approved.
 
-- Adds ~3s to session start (the classifier is a real Haiku call).
-- Preserves any existing `claude` shell function as `_claude_stock`, which is also
-  your escape hatch.
-- Wrappers that call `command claude` directly are untouched.
-- zsh only.
+During a running turn, status checks are local. Other input queues for the next
+turn; it cannot downgrade a model halfway through its answer. Background result
+events are correlated separately from the foreground turn. Background permissions
+are serviced while waiting for input, and cancelled approvals stop waiting.
+
+`--resume ID` restores a routed session's task anchor from a private mode-600
+sidecar under `~/.local/state/claude-auto-model/`. It contains the initial task
+text (up to 8,000 characters), route and context estimate, not the full transcript.
+`CA_STATE_DIR` changes that directory. `--no-session-persistence` disables these
+writes too. Native sessions and `--continue` without matching router metadata
+conservatively retain the initialized model for short follow-ups; Claude still
+loads their full transcript. Native `/clear`, `/new` and `/reset` clear the
+router anchor after successful completion.
+
+Unrecognized terminal options fail explicitly. Use `_claude_stock` for native
+flags or UI commands the controller does not expose. Provider-specific wrappers
+that invoke `command claude` keep their existing behavior.
+
+## Subagents
+
+The PreToolUse callback routes Agent/Task calls using the delegated task, not
+the parent's complexity.
+
+- General-purpose children select registered `auto-xs` through `auto-xl`
+  definitions, which carry the appropriate model and effort.
+- Explicit model arguments are preserved.
+- Specialized agent types keep their definitions and frontmatter effort while
+  missing model selections can be routed.
+- Resumed agents and forks keep Claude's native configuration.
+- Agent calls have no effort argument. The router does not inject one.
+- Exact subagent versions or effort overrides requiring an unregistered
+  definition are refused explicitly.
+- Workflow and other orchestration tools retain their own schemas and routing.
+  The appended [guidance](TIERING.md) covers those; they are not intercepted.
+
+## Verification
+
+```sh
+ca-test                         # Offline regression tests, no inference
+ca-doctor                       # Live control support, no inference
+python3 verify_live.py          # Paid synthetic five-turn routing/memory check
+python3 verify_live.py --subagent # Paid synthetic real Agent callback check
+python3 verify_live.py --resume   # Paid restart/resume check with a CSS preference
+```
+
+The live five-turn check has passed:
+**Haiku -> Opus 5 -> Sonnet 5 -> Fable 5.1 -> Haiku**, with one process,
+one session ID, observed response model IDs and retained conversation memory.
+The real subagent check routed a typo correction to the Sonnet/low definition
+and completed it.
+An interactive continuity check kept Fable/xhigh for a status check and short
+continuation, then chose Haiku for an unrelated question. No percentage savings
+or "best model" quality claim is inferred from these synthetic checks.
+Restart/resume retained a user's CSS color preference, and a real permission
+callback required approval before running a harmless print command. A separate
+Opus/max marker probe received an upstream safeguards refusal; that error was
+surfaced, not silently retried on a different model.
+
+Print mode keeps routing diagnostics on stderr:
+
+```sh
+claude -p --output-format json "your task"
+printf 'your task' | python3 auto_model.py -p
+```
+
+The code reads no credential files itself. The Claude CLI handles authentication.
+No global model settings are rewritten. Original shell launch functions are
+copied without executing their bodies.
+
+The [implementation notes](docs/implementation.md) record the recovered
+requirements and original audit. Relevant upstream references:
+[model configuration](https://code.claude.com/docs/en/model-config),
+[SDK controls](https://code.claude.com/docs/en/agent-sdk/typescript#applyflagsettings),
+[hooks](https://code.claude.com/docs/en/hooks).
 
 MIT.
