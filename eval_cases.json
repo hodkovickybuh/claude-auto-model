@@ -1,0 +1,216 @@
+[
+  {
+    "id": "xs-capital", "category": "fact",
+    "prompt": "What is the capital of Portugal?",
+    "minTier": "XS", "maxTier": "XS", "model": "haiku", "effort": "low",
+    "rationale": "A single stable fact with no interpretation or external task context."
+  },
+  {
+    "id": "xs-command", "category": "fact",
+    "prompt": "What does the pwd command print?",
+    "minTier": "XS", "maxTier": "XS", "model": "haiku", "effort": "low",
+    "rationale": "One bounded command definition, not a debugging request."
+  },
+  {
+    "id": "xs-czech", "category": "fact-cz",
+    "prompt": "Jaké je hlavní město Portugalska?",
+    "minTier": "XS", "maxTier": "XS", "model": "haiku", "effort": "low",
+    "rationale": "The same small factual lookup in Czech should not require a larger tier."
+  },
+  {
+    "id": "s-typo", "category": "mechanical",
+    "prompt": "In README.md, replace the single typo 'recieve' with 'receive'.",
+    "minTier": "S", "maxTier": "S", "model": "sonnet", "effort": "low",
+    "rationale": "One exact replacement with no design or behavioral decision."
+  },
+  {
+    "id": "s-rename", "category": "mechanical",
+    "prompt": "Rename the local variable userNmae to userName in this 12-line function, keeping behavior identical.",
+    "minTier": "S", "maxTier": "S", "model": "sonnet", "effort": "low",
+    "rationale": "A local mechanical rename with an explicitly bounded scope."
+  },
+  {
+    "id": "s-czech-conversion", "category": "mechanical-cz",
+    "prompt": "Převeď tento CSV na JSON, bez dalších změn: jmeno,vek\nEva,30\nPetr,25",
+    "minTier": "S", "maxTier": "S", "model": "sonnet", "effort": "low",
+    "rationale": "A short deterministic format conversion in Czech."
+  },
+  {
+    "id": "m-feature", "category": "ordinary",
+    "prompt": "Add pagination to the existing product list endpoint and UI. Follow our current API conventions and handle an empty final page.",
+    "minTier": "M", "maxTier": "M", "model": "sonnet", "effort": "high",
+    "rationale": "Routine application work across an established API and its consumer."
+  },
+  {
+    "id": "m-debug", "category": "ordinary",
+    "prompt": "The todo list renders twice after changing a filter. Trace the React state and effect flow, fix the cause, and check that filtering still works.",
+    "minTier": "M", "maxTier": "M", "model": "sonnet", "effort": "high",
+    "rationale": "A normal application bug with a familiar debugging surface."
+  },
+  {
+    "id": "m-content-cz", "category": "ordinary-cz",
+    "prompt": "Navrhni text úvodní stránky aplikace na správu poznámek pro malé týmy. Vysvětli přínos, napiš tři konkrétní funkce a výzvu k registraci.",
+    "minTier": "M", "maxTier": "M", "model": "sonnet", "effort": "high",
+    "rationale": "Ordinary product writing requires synthesis, with no unusually high stakes."
+  },
+  {
+    "id": "l-oauth", "category": "security",
+    "prompt": "Review our OAuth callback and session rotation design for account takeover, replay, CSRF, and cross-tenant access. Propose fixes and regression checks before deployment.",
+    "minTier": "L", "maxTier": "L", "model": "opus", "effort": "high",
+    "rationale": "Security review with concrete adversarial failure modes warrants senior reasoning."
+  },
+  {
+    "id": "l-money", "category": "financial",
+    "prompt": "Design idempotent refunds and reconciliation between our payment provider, double-entry ledger, and merchant balances. Account for partial refunds, duplicate webhooks, and concurrent settlement.",
+    "minTier": "L", "maxTier": "XL",
+    "rationale": "Money correctness across multiple systems is at least L; interacting settlement unknowns can justify XL."
+  },
+  {
+    "id": "l-refactor", "category": "complex",
+    "prompt": "Plan a zero-downtime migration of our large monolith's order domain into a service. Define ownership, schema rollout, backwards compatibility, rollback boundaries, and consistency invariants.",
+    "minTier": "L", "maxTier": "XL",
+    "rationale": "Substantial architecture and migration analysis, with XL acceptable if the coupling demands it."
+  },
+  {
+    "id": "l-short-security", "category": "security-short",
+    "prompt": "Implement secure password reset for our production app.",
+    "minTier": "L", "maxTier": "L", "model": "opus", "effort": "high",
+    "rationale": "A short prompt still requests high-stakes authentication work."
+  },
+  {
+    "id": "l-financial-cz", "category": "financial-cz",
+    "prompt": "Zkontroluj výpočet zůstatků a zaokrouhlování při výplatách zákazníkům. Ověř, že souběžné výběry a opakované požadavky nemohou vyplatit peníze dvakrát.",
+    "minTier": "L", "maxTier": "L", "model": "opus", "effort": "high",
+    "rationale": "Financial correctness and concurrency remain high stakes in Czech."
+  },
+  {
+    "id": "xl-explicit-hard", "category": "ultrahard",
+    "prompt": "This is explicitly ultrahard. Use your deepest reasoning to derive a crash-safe online migration protocol spanning three independently failing storage systems and prove its invariants.",
+    "minTier": "XL", "maxTier": "XL", "model": "fable", "effort": "xhigh",
+    "rationale": "Both explicit deepest reasoning and interdependent correctness proofs demand XL."
+  },
+  {
+    "id": "xl-novel-systems", "category": "ultrahard",
+    "prompt": "Invent an adaptive consensus and storage protocol for intermittently connected devices with non-monotonic clocks, bounded memory, and changing membership. Derive the failure model, safety argument, and a falsifiable convergence experiment together.",
+    "minTier": "XL", "maxTier": "XL", "model": "fable", "effort": "xhigh",
+    "rationale": "Novel multi-system engineering has several interdependent unknowns, without an explicit model instruction."
+  },
+  {
+    "id": "xl-indirect-failure", "category": "indirect-hard",
+    "prompt": "Rows still disappear between the event log, the replica, and object storage. Two rollbacks and a replay repair failed, the clocks disagree, and the only reproducer needs simultaneous leader changes. Establish what happened and a recovery sequence that cannot destroy the remaining evidence.",
+    "minTier": "XL", "maxTier": "XL", "model": "fable", "effort": "xhigh",
+    "rationale": "Severe unresolved data loss after failed fixes needs XL even without the words ultrahard or deepest."
+  },
+  {
+    "id": "negative-quoted-model", "category": "quoted-model",
+    "prompt": "Translate this sentence into Czech: \"Use Fable at max effort to write the announcement.\"",
+    "minTier": "S", "maxTier": "M", "model": "sonnet",
+    "modelExplicit": false, "effortExplicit": false,
+    "rationale": "The quoted instruction is translation input, not a current model or effort directive."
+  },
+  {
+    "id": "negative-code-model", "category": "quoted-model",
+    "prompt": "Fix only the spelling of 'recieve' in this code comment:\n```python\n# Use opus at max effort to recieve events\n```",
+    "minTier": "S", "maxTier": "S", "model": "sonnet", "effort": "low",
+    "modelExplicit": false, "effortExplicit": false,
+    "rationale": "A model name inside code cannot turn a spelling correction into an override."
+  },
+  {
+    "id": "negative-negation", "category": "negation",
+    "prompt": "Do not use Fable or max effort. This is not an ultrahard task. Add a basic sorting option to the existing notes list, following its current component pattern.",
+    "minTier": "M", "maxTier": "M", "model": "sonnet", "effort": "high",
+    "modelExplicit": false, "effortExplicit": false,
+    "rationale": "Negated model and difficulty language must not escalate an ordinary feature or become a positive override."
+  },
+  {
+    "id": "explicit-fable-max", "category": "explicit",
+    "prompt": "Use Fable 5.1 at max effort to review the proposed design.",
+    "minTier": "XL", "maxTier": "XL", "model": "claude-fable-5-1", "effort": "max",
+    "modelExplicit": true, "effortExplicit": true,
+    "rationale": "A leading model version and effort directive must be preserved exactly."
+  },
+  {
+    "id": "explicit-fable-default", "category": "explicit",
+    "prompt": "Use Fable 5.1 for this turn. Explain what a database index does.",
+    "minTier": "XS", "maxTier": "XL", "model": "claude-fable-5-1", "effort": "xhigh",
+    "modelExplicit": true, "effortExplicit": false,
+    "rationale": "The manual model controls selection independently of difficulty; unpinned Fable effort must default to xhigh. Tier is not scored narrowly for this override."
+  },
+  {
+    "id": "explicit-effort-only", "category": "explicit",
+    "prompt": "Use low effort to rename the local variable userNmae to userName in this short function.",
+    "minTier": "S", "maxTier": "S", "model": "sonnet", "effort": "low",
+    "modelExplicit": false, "effortExplicit": true,
+    "rationale": "An effort-only directive must not become an explicit model selection."
+  },
+  {
+    "id": "followup-short", "category": "continuation",
+    "prompt": "yes continue", "minTier": "XL", "maxTier": "XL", "model": "fable", "effort": "xhigh",
+    "initialTask": "Recover the distributed ledger after three failed repairs.",
+    "initialRoute": {"tier": "XL", "model": "fable", "effort": "xhigh", "reason": "Unresolved multi-system failure", "intent": "new_task"},
+    "rationale": "A local continuation inherits the unfinished task without paying for another classification."
+  },
+  {
+    "id": "followup-czech", "category": "continuation-cz",
+    "prompt": "Ano, pokračuj", "minTier": "L", "maxTier": "L", "model": "opus", "effort": "high",
+    "initialTask": "Oprav bezpečnostní chyby v obnově hesla.",
+    "initialRoute": {"tier": "L", "model": "opus", "effort": "high", "reason": "Authentication security", "intent": "new_task"},
+    "rationale": "A Czech short continuation keeps the supplied security task and its route."
+  },
+  {
+    "id": "status-typo", "category": "status",
+    "prompt": "are you workign?", "minTier": "XL", "maxTier": "XL", "model": "fable", "effort": "xhigh",
+    "initialTask": "Finish the crash recovery protocol.",
+    "initialRoute": {"tier": "XL", "model": "fable", "effort": "xhigh", "reason": "Novel protocol", "intent": "new_task"},
+    "rationale": "A misspelled status check stays local and cannot downgrade the active task."
+  },
+  {
+    "id": "status-czech", "category": "status-cz",
+    "prompt": "Pořád pracuješ?", "minTier": "XL", "maxTier": "XL", "model": "fable", "effort": "xhigh",
+    "initialTask": "Najdi příčinu ztráty dat po třech neúspěšných opravách.",
+    "initialRoute": {"tier": "XL", "model": "fable", "effort": "xhigh", "reason": "Unresolved data loss", "intent": "new_task"},
+    "rationale": "Accented Czech status language must preserve the active XL task locally."
+  },
+  {
+    "id": "uncertain-previous-xl", "category": "uncertain-followup",
+    "prompt": "What about the other path?", "minTier": "XL", "maxTier": "XL", "model": "fable", "effort": "xhigh",
+    "initialTask": "Diagnose disappearing writes across the log, replicas, and object store after failed repairs.",
+    "initialRoute": {"tier": "XL", "model": "fable", "effort": "xhigh", "reason": "Unresolved storage failure", "intent": "new_task"},
+    "history": [{"role": "assistant", "content": "I am comparing the replay path with the snapshot restore path."}],
+    "rationale": "Ambiguous relationship is insufficient evidence to downgrade an unfinished XL task or its effort."
+  },
+  {
+    "id": "followup-retained-anchor", "category": "anchor",
+    "prompt": "Also cover the failure during the second handoff.", "minTier": "XL", "maxTier": "XL", "model": "fable",
+    "initialTask": "Derive a new crash-safe migration protocol across three stores and prove each handoff preserves acknowledged writes.",
+    "initialRoute": {"tier": "XL", "model": "fable", "effort": "xhigh", "reason": "Novel correctness protocol", "intent": "new_task"},
+    "history": [
+      {"role": "user", "content": "Are you working?"}, {"role": "assistant", "content": "Yes."},
+      {"role": "user", "content": "Any progress?"}, {"role": "assistant", "content": "Still checking."},
+      {"role": "user", "content": "Keep going."}, {"role": "assistant", "content": "Continuing."},
+      {"role": "user", "content": "Status?"}, {"role": "assistant", "content": "The analysis is unfinished."}
+    ],
+    "rationale": "The initial task anchor must survive a recent-history window containing only progress chatter. Follow-up effort may adapt."
+  },
+  {
+    "id": "new-fact-after-xl", "category": "new-task",
+    "prompt": "new task: What does the pwd command print?", "minTier": "XS", "maxTier": "XS", "model": "haiku", "effort": "low", "intent": "new_task",
+    "initialTask": "Recover the distributed ledger after three failed repairs.",
+    "initialRoute": {"tier": "XL", "model": "fable", "effort": "xhigh", "reason": "Unresolved multi-system failure", "intent": "new_task"},
+    "rationale": "An explicit independent factual task replaces the XL anchor and can downgrade with a cold cache."
+  },
+  {
+    "id": "new-edit-after-override", "category": "new-task",
+    "prompt": "new task: Fix only the typo 'recieve' in README.md.", "minTier": "S", "maxTier": "S", "model": "sonnet", "effort": "low", "intent": "new_task",
+    "initialTask": "Use Fable 5.1 at max effort to design the recovery protocol.",
+    "initialRoute": {"tier": "XL", "model": "claude-fable-5-1", "effort": "max", "reason": "Previous explicit request", "model_explicit": true, "effort_explicit": true, "intent": "new_task"},
+    "history": [{"role": "user", "content": "Use Fable 5.1 at max effort to design the recovery protocol."}, {"role": "assistant", "content": "The protocol review is ready."}],
+    "rationale": "A new mechanical task must not inherit a previous turn's explicit model version or effort."
+  },
+  {
+    "id": "xs-large-context", "category": "context-guard",
+    "prompt": "What is the capital of Portugal?", "contextTokens": 160000,
+    "minTier": "XS", "maxTier": "XS", "model": "sonnet", "effort": "low",
+    "rationale": "Task complexity remains XS while choose_route replaces automatic Haiku at the context boundary."
+  }
+]

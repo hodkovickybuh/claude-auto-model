@@ -1,0 +1,1081 @@
+{
+  "mode": "live",
+  "ok": false,
+  "validated_cases": 32,
+  "selected_cases": 32,
+  "evaluated_cases": 32,
+  "passed": 26,
+  "failed": 6,
+  "pass_rate": 0.8125,
+  "classifier_calls": 28,
+  "classifier_errors": 1,
+  "timeouts": 1,
+  "mismatches": 5,
+  "reported_cost_usd": 0.181492,
+  "cases": [
+    {
+      "id": "xs-capital",
+      "category": "fact",
+      "passed": false,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "quality floor: Haiku requires a bounded lookup; Simple factual lookup: capital of a specific country.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "quality floor: Haiku requires a bounded lookup; Simple factual lookup: capital of a specific country.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "What is the capital of Portugal?",
+      "mismatches": {
+        "tier": {
+          "min": "XS",
+          "max": "XS",
+          "actual": "M"
+        },
+        "model": {
+          "expected": "haiku",
+          "actual": "sonnet"
+        },
+        "effort": {
+          "expected": "low",
+          "actual": "high"
+        }
+      },
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.006194,
+      "latency_seconds": 17.115729
+    },
+    {
+      "id": "xs-command",
+      "category": "fact",
+      "passed": false,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "quality floor: Haiku requires a bounded lookup; Simple factual explanation of a single command",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "quality floor: Haiku requires a bounded lookup; Simple factual explanation of a single command",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "What does the pwd command print?",
+      "mismatches": {
+        "tier": {
+          "min": "XS",
+          "max": "XS",
+          "actual": "M"
+        },
+        "model": {
+          "expected": "haiku",
+          "actual": "sonnet"
+        },
+        "effort": {
+          "expected": "low",
+          "actual": "high"
+        }
+      },
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.004984000000000001,
+      "latency_seconds": 6.298285
+    },
+    {
+      "id": "xs-czech",
+      "category": "fact-cz",
+      "passed": false,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "quality floor: Haiku requires a bounded lookup; Simple factual lookup: capital city of a country.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "quality floor: Haiku requires a bounded lookup; Simple factual lookup: capital city of a country.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Jaké je hlavní město Portugalska?",
+      "mismatches": {
+        "tier": {
+          "min": "XS",
+          "max": "XS",
+          "actual": "M"
+        },
+        "model": {
+          "expected": "haiku",
+          "actual": "sonnet"
+        },
+        "effort": {
+          "expected": "low",
+          "actual": "high"
+        }
+      },
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.004825,
+      "latency_seconds": 5.639715
+    },
+    {
+      "id": "s-typo",
+      "category": "mechanical",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "S",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "Simple typo fix in README.md; one obvious mechanical edit.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "S",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "Simple typo fix in README.md; one obvious mechanical edit.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "In README.md, replace the single typo 'recieve' with 'receive'.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.005935,
+      "latency_seconds": 8.747434
+    },
+    {
+      "id": "s-rename",
+      "category": "mechanical",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "S",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "One-line variable rename in a small function; simple mechanical edit with no behavioral complexity.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "S",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "One-line variable rename in a small function; simple mechanical edit with no behavioral complexity.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Rename the local variable userNmae to userName in this 12-line function, keeping behavior identical.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.005509,
+      "latency_seconds": 7.817359
+    },
+    {
+      "id": "s-czech-conversion",
+      "category": "mechanical-cz",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "S",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "Simple CSV to JSON format conversion of a small, well-formed dataset.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "S",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "Simple CSV to JSON format conversion of a small, well-formed dataset.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Převeď tento CSV na JSON, bez dalších změn: jmeno,vek\nEva,30\nPetr,25",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.005962,
+      "latency_seconds": 8.371869
+    },
+    {
+      "id": "m-feature",
+      "category": "ordinary",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "Pagination feature spanning backend endpoint and frontend UI, coordinated changes following established API conventions with edge case handling.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "Pagination feature spanning backend endpoint and frontend UI, coordinated changes following established API conventions with edge case handling.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Add pagination to the existing product list endpoint and UI. Follow our current API conventions and handle an empty final page.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.007304000000000001,
+      "latency_seconds": 12.412806
+    },
+    {
+      "id": "m-debug",
+      "category": "ordinary",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "Routine React debugging: trace state/effect flow to identify double-render cause after filter change, implement fix, and verify filtering works correctly.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "Routine React debugging: trace state/effect flow to identify double-render cause after filter change, implement fix, and verify filtering works correctly.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "The todo list renders twice after changing a filter. Trace the React state and effect flow, fix the cause, and check that filtering still works.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.0071730000000000006,
+      "latency_seconds": 11.738818
+    },
+    {
+      "id": "m-content-cz",
+      "category": "ordinary-cz",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "Landing page copywriting task for team note-taking app. Routine content creation with defined scope: benefits, three features, registration CTA.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "Landing page copywriting task for team note-taking app. Routine content creation with defined scope: benefits, three features, registration CTA.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Navrhni text úvodní stránky aplikace na správu poznámek pro malé týmy. Vysvětli přínos, napiš tři konkrétní funkce a výzvu k registraci.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.006343,
+      "latency_seconds": 9.207148
+    },
+    {
+      "id": "l-oauth",
+      "category": "security",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "L",
+        "model": "opus",
+        "effort": "high",
+        "reason": "High-stakes security review of OAuth callback and session rotation against account takeover, replay, CSRF, and cross-tenant access. Requires architectural judgment, threat analysis, and security-sensitive code assessment.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "L",
+        "model": "opus",
+        "effort": "high",
+        "reason": "High-stakes security review of OAuth callback and session rotation against account takeover, replay, CSRF, and cross-tenant access. Requires architectural judgment, threat analysis, and security-sensitive code assessment.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Review our OAuth callback and session rotation design for account takeover, replay, CSRF, and cross-tenant access. Propose fixes and regression checks before deployment.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.007233999999999999,
+      "latency_seconds": 11.327546
+    },
+    {
+      "id": "l-money",
+      "category": "financial",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Multi-system financial architecture requiring concurrent settlement coordination, idempotency proofs, and reconciliation between payment provider, ledger, and merchant balances with duplicate webhook and partial refund handling.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Multi-system financial architecture requiring concurrent settlement coordination, idempotency proofs, and reconciliation between payment provider, ledger, and merchant balances with duplicate webhook and partial refund handling.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Design idempotent refunds and reconciliation between our payment provider, double-entry ledger, and merchant balances. Account for partial refunds, duplicate webhooks, and concurrent settlement.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.011772999999999999,
+      "latency_seconds": 21.626603
+    },
+    {
+      "id": "l-refactor",
+      "category": "complex",
+      "passed": false,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "L",
+        "model": "opus",
+        "effort": "high",
+        "reason": "classifier unavailable: timeout",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "uncertain"
+      },
+      "actual": {
+        "tier": "L",
+        "model": "opus",
+        "effort": "high",
+        "reason": "classifier unavailable: timeout",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "uncertain"
+      },
+      "active_task": "Plan a zero-downtime migration of our large monolith's order domain into a service. Define ownership, schema rollout, backwards compatibility, rollback boundaries, and consistency invariants.",
+      "mismatches": {},
+      "error": "classifier unavailable: timeout",
+      "error_kind": "timeout",
+      "reported_cost_usd": 0.0,
+      "latency_seconds": 25.0135
+    },
+    {
+      "id": "l-short-security",
+      "category": "security-short",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "L",
+        "model": "opus",
+        "effort": "high",
+        "reason": "High-stakes security implementation for production: requires token generation, validation, secure storage, expiration handling, and multi-component architecture decisions.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "L",
+        "model": "opus",
+        "effort": "high",
+        "reason": "High-stakes security implementation for production: requires token generation, validation, secure storage, expiration handling, and multi-component architecture decisions.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Implement secure password reset for our production app.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.005613,
+      "latency_seconds": 8.066051
+    },
+    {
+      "id": "l-financial-cz",
+      "category": "financial-cz",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "L",
+        "model": "opus",
+        "effort": "high",
+        "reason": "High-stakes financial audit requiring verification of concurrent withdrawal safety, balance calculations, rounding correctness, and idempotency to prevent double-payment.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "L",
+        "model": "opus",
+        "effort": "high",
+        "reason": "High-stakes financial audit requiring verification of concurrent withdrawal safety, balance calculations, rounding correctness, and idempotency to prevent double-payment.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Zkontroluj výpočet zůstatků a zaokrouhlování při výplatách zákazníkům. Ověř, že souběžné výběry a opakované požadavky nemohou vyplatit peníze dvakrát.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.008652,
+      "latency_seconds": 14.155325
+    },
+    {
+      "id": "xl-explicit-hard",
+      "category": "ultrahard",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Novel distributed systems protocol design requiring crash-safety proofs across three independently failing systems with formal invariant verification.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Novel distributed systems protocol design requiring crash-safety proofs across three independently failing systems with formal invariant verification.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "This is explicitly ultrahard. Use your deepest reasoning to derive a crash-safe online migration protocol spanning three independently failing storage systems and prove its invariants.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.0060420000000000005,
+      "latency_seconds": 8.822297
+    },
+    {
+      "id": "xl-novel-systems",
+      "category": "ultrahard",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Novel distributed protocol design under multiple constraints: intermittent connectivity, clock unreliability, memory bounds, and membership changes; requires formal analysis and experimental validation.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Novel distributed protocol design under multiple constraints: intermittent connectivity, clock unreliability, memory bounds, and membership changes; requires formal analysis and experimental validation.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Invent an adaptive consensus and storage protocol for intermittently connected devices with non-monotonic clocks, bounded memory, and changing membership. Derive the failure model, safety argument, and a falsifiable convergence experiment together.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.008379000000000001,
+      "latency_seconds": 14.157815
+    },
+    {
+      "id": "xl-indirect-failure",
+      "category": "indirect-hard",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Unresolved data loss across multi-component system after multiple failed repairs; requires forensic investigation of distributed state with clock disagreements and complex reproduction requirements.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Unresolved data loss across multi-component system after multiple failed repairs; requires forensic investigation of distributed state with clock disagreements and complex reproduction requirements.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Rows still disappear between the event log, the replica, and object storage. Two rollbacks and a replay repair failed, the clocks disagree, and the only reproducer needs simultaneous leader changes. Establish what happened and a recovery sequence that cannot destroy the remaining evidence.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.008383999999999999,
+      "latency_seconds": 13.840794
+    },
+    {
+      "id": "negative-quoted-model",
+      "category": "quoted-model",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "quality floor: Haiku requires a bounded lookup; Simple single-sentence translation task; bounded factual work requiring no investigation or implementation.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "quality floor: Haiku requires a bounded lookup; Simple single-sentence translation task; bounded factual work requiring no investigation or implementation.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Translate this sentence into Czech: \"Use Fable at max effort to write the announcement.\"",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.006967,
+      "latency_seconds": 10.238279
+    },
+    {
+      "id": "negative-code-model",
+      "category": "quoted-model",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "S",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "Simple spelling correction of one word in a code comment.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "S",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "Simple spelling correction of one word in a code comment.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Fix only the spelling of 'recieve' in this code comment:\n```python\n# Use opus at max effort to recieve events\n```",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.007391,
+      "latency_seconds": 10.696288
+    },
+    {
+      "id": "negative-negation",
+      "category": "negation",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "Adding a sorting feature to an existing notes component requires understanding current patterns and implementing sort logic, but is routine enhancement work without architectural complexity.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "Adding a sorting feature to an existing notes component requires understanding current patterns and implementing sort logic, but is routine enhancement work without architectural complexity.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Do not use Fable or max effort. This is not an ultrahard task. Add a basic sorting option to the existing notes list, following its current component pattern.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.008218,
+      "latency_seconds": 13.391205
+    },
+    {
+      "id": "explicit-fable-max",
+      "category": "explicit",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "XL",
+        "model": "claude-fable-5-1",
+        "effort": "max",
+        "reason": "Explicit model and effort request",
+        "model_explicit": true,
+        "effort_explicit": true,
+        "intent": "uncertain"
+      },
+      "actual": {
+        "tier": "XL",
+        "model": "claude-fable-5-1",
+        "effort": "max",
+        "reason": "Explicit model and effort request",
+        "model_explicit": true,
+        "effort_explicit": true,
+        "intent": "uncertain"
+      },
+      "active_task": "Use Fable 5.1 at max effort to review the proposed design.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.0,
+      "latency_seconds": 0.000385
+    },
+    {
+      "id": "explicit-fable-default",
+      "category": "explicit",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "XL",
+        "model": "claude-fable-5-1",
+        "effort": "xhigh",
+        "reason": "Bounded factual explanation of a standard database concept; no implementation or investigation required.",
+        "model_explicit": true,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "XL",
+        "model": "claude-fable-5-1",
+        "effort": "xhigh",
+        "reason": "Bounded factual explanation of a standard database concept; no implementation or investigation required.",
+        "model_explicit": true,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Use Fable 5.1 for this turn. Explain what a database index does.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.007075,
+      "latency_seconds": 10.065684
+    },
+    {
+      "id": "explicit-effort-only",
+      "category": "explicit",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "S",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "Simple variable rename (typo fix from userNmae to userName)",
+        "model_explicit": false,
+        "effort_explicit": true,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "S",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "Simple variable rename (typo fix from userNmae to userName)",
+        "model_explicit": false,
+        "effort_explicit": true,
+        "intent": "new_task"
+      },
+      "active_task": "Use low effort to rename the local variable userNmae to userName in this short function.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.008341000000000001,
+      "latency_seconds": 13.099604
+    },
+    {
+      "id": "followup-short",
+      "category": "continuation",
+      "passed": true,
+      "source": "local_continuation",
+      "classifier_called": false,
+      "proposal": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Unresolved multi-system failure",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "active task continuity; Unresolved multi-system failure",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "follow_up"
+      },
+      "active_task": "Recover the distributed ledger after three failed repairs.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.0,
+      "latency_seconds": 0.000149
+    },
+    {
+      "id": "followup-czech",
+      "category": "continuation-cz",
+      "passed": true,
+      "source": "local_continuation",
+      "classifier_called": false,
+      "proposal": {
+        "tier": "L",
+        "model": "opus",
+        "effort": "high",
+        "reason": "Authentication security",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "L",
+        "model": "opus",
+        "effort": "high",
+        "reason": "active task continuity; Authentication security",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "follow_up"
+      },
+      "active_task": "Oprav bezpečnostní chyby v obnově hesla.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.0,
+      "latency_seconds": 0.000118
+    },
+    {
+      "id": "status-typo",
+      "category": "status",
+      "passed": true,
+      "source": "local_status",
+      "classifier_called": false,
+      "proposal": null,
+      "actual": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Novel protocol",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Finish the crash recovery protocol.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.0,
+      "latency_seconds": 4.4e-05
+    },
+    {
+      "id": "status-czech",
+      "category": "status-cz",
+      "passed": true,
+      "source": "local_status",
+      "classifier_called": false,
+      "proposal": null,
+      "actual": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Unresolved data loss",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "Najdi příčinu ztráty dat po třech neúspěšných opravách.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.0,
+      "latency_seconds": 6.2e-05
+    },
+    {
+      "id": "uncertain-previous-xl",
+      "category": "uncertain-followup",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Continuing investigation of alternative recovery paths in data loss diagnosis after failed repairs; unresolved multi-system integrity failure.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "follow_up"
+      },
+      "actual": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "active task continuity; Continuing investigation of alternative recovery paths in data loss diagnosis after failed repairs; unresolved multi-system integrity failure.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "follow_up"
+      },
+      "active_task": "Diagnose disappearing writes across the log, replicas, and object store after failed repairs.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.007627,
+      "latency_seconds": 11.812967
+    },
+    {
+      "id": "followup-retained-anchor",
+      "category": "anchor",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "Continuing active task: derive crash-safe multi-store migration protocol with formal proof of handoff guarantees, now including second handoff failure mode analysis.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "follow_up"
+      },
+      "actual": {
+        "tier": "XL",
+        "model": "fable",
+        "effort": "xhigh",
+        "reason": "active task continuity; Continuing active task: derive crash-safe multi-store migration protocol with formal proof of handoff guarantees, now including second handoff failure mode analysis.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "follow_up"
+      },
+      "active_task": "Derive a new crash-safe migration protocol across three stores and prove each handoff preserves acknowledged writes.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.008183,
+      "latency_seconds": 13.208411
+    },
+    {
+      "id": "new-fact-after-xl",
+      "category": "new-task",
+      "passed": false,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "quality floor: Haiku requires a bounded lookup; Simple factual explanation of what a standard command does",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "quality floor: Haiku requires a bounded lookup; Simple factual explanation of what a standard command does",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "new task: What does the pwd command print?",
+      "mismatches": {
+        "tier": {
+          "min": "XS",
+          "max": "XS",
+          "actual": "M"
+        },
+        "model": {
+          "expected": "haiku",
+          "actual": "sonnet"
+        },
+        "effort": {
+          "expected": "low",
+          "actual": "high"
+        }
+      },
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.005402,
+      "latency_seconds": 7.018847
+    },
+    {
+      "id": "new-edit-after-override",
+      "category": "new-task",
+      "passed": true,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "S",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "Single typo fix in one file requires straightforward text replacement.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "S",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "Single typo fix in one file requires straightforward text replacement.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "new task: Fix only the typo 'recieve' in README.md.",
+      "mismatches": {},
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.006841,
+      "latency_seconds": 9.731583
+    },
+    {
+      "id": "xs-large-context",
+      "category": "context-guard",
+      "passed": false,
+      "source": "classifier",
+      "classifier_called": true,
+      "proposal": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "quality floor: Haiku requires a bounded lookup; Bounded factual lookup with a single, unambiguous answer.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "actual": {
+        "tier": "M",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "quality floor: Haiku requires a bounded lookup; Bounded factual lookup with a single, unambiguous answer.",
+        "model_explicit": false,
+        "effort_explicit": false,
+        "intent": "new_task"
+      },
+      "active_task": "What is the capital of Portugal?",
+      "mismatches": {
+        "tier": {
+          "min": "XS",
+          "max": "XS",
+          "actual": "M"
+        },
+        "effort": {
+          "expected": "low",
+          "actual": "high"
+        }
+      },
+      "error": null,
+      "error_kind": null,
+      "reported_cost_usd": 0.005141,
+      "latency_seconds": 6.435
+    }
+  ],
+  "jobs": 2,
+  "python": "3.14.6",
+  "limitations": [
+    "Offline mode validates corpus structure only; run unittest separately.",
+    "Live pass rate is agreement with this small hand-labeled corpus, not general accuracy.",
+    "Initial routes are supplied; no task answers, engine switching, or savings are evaluated.",
+    "Cost is classifier-reported USD only; missing charges and task costs are not measured.",
+    "Classifier calls count classify invocations, which may resolve without inference.",
+    "No session locks or engine availability probe; model aliases and live results may change."
+  ],
+  "corpus_sha256": "4f125f831072c3404dbf341cdc5deb2b26fc05685f95cd5cd395cce057a1d992",
+  "source_sha256": {
+    "eval_routing.py": "80c040327be6a539d695330ebdc276b18cc100a9b2d5e714c1408a4e7d94f9dc",
+    "routing.py": "2ddaa2f6e6d2a569465594b33741536278ffa2dee2f39cb47b75f6e775fc6750",
+    "continuity.py": "17067026515f0e834e32fa917fda41a63b724032eeadfa26cf806219fa87caeb",
+    "auto_model.py": "2b291cd2a07923bae391fd9af9b3bcdc54ee19c89336fe5df230a575de402180"
+  },
+  "latency_seconds": {
+    "median": 9.898633499999999,
+    "max": 25.0135
+  },
+  "elapsed_seconds": 156.475519
+}

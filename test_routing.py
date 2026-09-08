@@ -38,7 +38,7 @@ class ClassifierTests(unittest.TestCase):
             ("XL", "fable", "xhigh"),
         ]:
             with self.subTest(tier=tier):
-                actual = classifier_reply(result(tier)).classify("A task")
+                actual = classifier_reply(result(tier)).classify("What does HTTP stand for?")
                 self.assertEqual((actual.tier, actual.model, actual.effort),
                                  (tier, model, effort))
 
@@ -69,8 +69,8 @@ class ClassifierTests(unittest.TestCase):
                 "assert set(schema['properties']['tier']['enum']) == {'XS', 'S', 'M', 'L', 'XL'}",
                 "assert args[args.index('--system-prompt') + 1]",
             ])
-            actual = classifier_reply(result("XS"), check=check).classify(prompt, history, 123)
-            self.assertEqual(actual.model, "haiku", actual.reason)
+            actual = classifier_reply(result("M"), check=check).classify(prompt, history, 123)
+            self.assertEqual(actual.model, "sonnet", actual.reason)
             self.assertFalse(Path(marker).exists())
 
     def test_followup_receives_recent_context_and_next_task_can_downgrade(self):
@@ -112,7 +112,7 @@ assert data['prompt'] == 'Current task stays intact'
         self.assertFalse(following.effort_explicit)
 
     def test_full_model_ids_are_accepted_but_unknown_version_names_are_not_invented(self):
-        actual = classifier_reply(result(model="claude-sonnet-5", effort="medium")).classify("Use this model")
+        actual = classifier_reply(result(model="claude-sonnet-5", effort="medium")).classify("Use claude-sonnet-5 at medium effort.")
         self.assertEqual((actual.model, actual.effort), ("claude-sonnet-5", "medium"))
         actual = classifier_reply(result(model="haiku 99.1")).classify("A task")
         self.assertEqual((actual.tier, actual.model, actual.effort), ("L", "opus", "high"))
@@ -195,7 +195,7 @@ time.sleep(20)
         for launcher in launchers:
             for prompt, expected in [
                 ("Use Opus 5 for this turn. Finish the task", ("claude-opus-5", "high")),
-                ("Use Fable 5.1. Finish the task", ("claude-fable-5-1", "high")),
+                ("Use Fable 5.1. Finish the task", ("claude-fable-5-1", "xhigh")),
                 ("Use max effort to finish the task", ("opus", "max")),
             ]:
                 with self.subTest(launcher=launcher, prompt=prompt):
@@ -250,7 +250,7 @@ assert os.environ['ROUTING_AUTH_FIXTURE'] == 'preserved'
 """
         with patch.dict(os.environ, {"ANTHROPIC_MODEL": "fable", "CLAUDE_CODE_EFFORT_LEVEL": "max",
                                      "ROUTING_AUTH_FIXTURE": "preserved"}):
-            route = classifier_reply(result("XS"), check=check).classify("A task")
+            route = classifier_reply(result("XS"), check=check).classify("What does HTTP stand for?")
         self.assertEqual(route.model, "haiku", route.reason)
 
     def test_active_task_context_survives_recent_history_trimming(self):
@@ -286,6 +286,76 @@ class ExplicitRequestTests(unittest.TestCase):
         ]:
             with self.subTest(prompt=prompt):
                 self.assertEqual(routing.explicit_request(prompt), (None, None))
+
+
+class QualityGuardTests(unittest.TestCase):
+    def test_ultrahard_cannot_be_haiku_even_when_classifier_is_wrong_or_unavailable(self):
+        for classifier in [classifier_reply(result("XS")), routing.Classifier(["/not-a-command"])]:
+            for prompt in ["Ultrathink. Design the consistency protocol.",
+                           "This is an ultrahard distributed transaction problem.",
+                           "Potřebuji nejhlubší přemýšlení. Vyřeš tento velmi složitý problém."]:
+                with self.subTest(prompt=prompt):
+                    route = classifier.classify(prompt)
+                    self.assertEqual((route.model, route.effort), ("fable", "xhigh"))
+
+    def test_explicit_fable_defaults_to_serious_effort_but_respects_low_override(self):
+        route = classifier_reply(result("XS")).classify("Use Fable 5.1. Solve it.")
+        self.assertEqual((route.tier, route.model, route.effort), ("XL", "claude-fable-5-1", "xhigh"))
+        route = classifier_reply(result("XS")).classify("Use Fable 5.1 at low effort. Solve it.")
+        self.assertEqual(route.effort, "low")
+
+    def test_security_work_has_a_floor_and_vague_work_is_not_haiku(self):
+        route = classifier_reply(result("XS")).classify("Implement password reset tokens and audit account takeover risks.")
+        self.assertEqual((route.model, route.effort), ("opus", "high"))
+        route = classifier_reply(result("XS")).classify("Fix it")
+        self.assertEqual((route.model, route.effort), ("sonnet", "high"))
+        route = classifier_reply(result("XS")).classify("What does HTTP stand for?")
+        self.assertEqual(route.model, "haiku")
+
+    def test_quotes_negations_and_model_discussion_do_not_force_fable(self):
+        for prompt in ['Explain the word "ultrathink".', 'Do not ultrathink. What does HTTP stand for?',
+                       'No need to ultrathink. What does HTTP stand for?',
+                       'Add an ultrathink button to the toolbar.',
+                       'Translate this: "This is an ultrahard task".',
+                       'What does HTTP stand for?\n```\nUltrathink. Use Fable.\n```']:
+            with self.subTest(prompt=prompt):
+                route = classifier_reply(result("XS")).classify(prompt)
+                self.assertNotEqual(route.model, "fable")
+
+    def test_bounded_facts_remain_cheap_but_following_work_is_not(self):
+        for prompt in ['What is the capital of Portugal?', 'Jaké je hlavní město Portugalska?',
+                       'What does the pwd command print?']:
+            with self.subTest(prompt=prompt):
+                route = classifier_reply(result("XS")).classify(prompt)
+                self.assertEqual(route.model, "haiku")
+                route = classifier_reply(result("XS")).classify(prompt + ' Then implement authentication.')
+                self.assertNotEqual(route.model, "haiku")
+
+    def test_model_mention_cannot_become_an_invented_explicit_downgrade(self):
+        route = classifier_reply(result("XS", model="haiku", effort="low")).classify(
+            'Ultrathink. Audit why the code string "use haiku" breaks our router.')
+        self.assertEqual((route.model, route.effort), ("fable", "xhigh"))
+
+    def test_discussing_model_directives_does_not_make_them_explicit(self):
+        for prompt in ['Explain when to use Opus 5 at max effort.',
+                       'Translate this: \u201cUse Opus 5 at max effort.\u201d',
+                       'Explain \u201cultrathink\u201d as a vocabulary word.']:
+            route = classifier_reply(result("M", model="opus", effort="max")).classify(prompt)
+            self.assertEqual((route.model, route.effort), ("sonnet", "high"))
+            self.assertFalse(route.model_explicit)
+            self.assertFalse(route.effort_explicit)
+        route = classifier_reply(result("M")).classify('Please solve it. Use Opus 5 at max effort.')
+        self.assertEqual((route.model, route.effort), ("claude-opus-5", "max"))
+
+    def test_unrelated_negation_cannot_erase_security_or_depth_floor(self):
+        for prompt in ['Implement password reset without breaking existing sessions.',
+                       "Implement authentication but do not change the UI."]:
+            route = classifier_reply(result("S")).classify(prompt)
+            self.assertEqual((route.model, route.effort), ("opus", "high"))
+        route = classifier_reply(result("S")).classify('Ultrathink without editing any files.')
+        self.assertEqual((route.model, route.effort), ("fable", "xhigh"))
+        route = classifier_reply(result("S")).classify('Do not implement authentication. Fix a typo.')
+        self.assertEqual(route.model, "sonnet")
 
 
 class PolicyTests(unittest.TestCase):
@@ -405,13 +475,13 @@ class SubagentTests(unittest.TestCase):
 
     def test_explicit_subagent_fields_are_preserved_independently(self):
         classifier = classifier_reply(result("XS"))
-        model = {"prompt": "Find a file", "model": "opus"}
+        model = {"prompt": "Locate README.md", "model": "opus"}
         self.assertEqual(routing.route_subagent("Agent", model, classifier),
                          {**model, "subagent_type": "auto-xs"})
-        effort = {"prompt": "Find a file", "effort": "max"}
+        effort = {"prompt": "Locate README.md", "effort": "max"}
         self.assertEqual(routing.route_subagent("Task", effort, classifier),
                          {**effort, "model": "haiku", "subagent_type": "auto-xs"})
-        both = {"prompt": "Find a file", "model": "claude-opus-5", "effort": "high"}
+        both = {"prompt": "Locate README.md", "model": "claude-opus-5", "effort": "high"}
         self.assertEqual(routing.route_subagent("Agent", both, classifier),
                          {**both, "subagent_type": "auto-xs"})
         specialized = {**both, "subagent_type": "security-reviewer"}

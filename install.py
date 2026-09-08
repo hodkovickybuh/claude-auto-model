@@ -16,7 +16,7 @@ LEGACY = (
 
 
 def install(shell_file=None, backup_dir=None):
-    target = Path(shell_file or Path.home() / ".zshrc").expanduser().resolve()
+    target = Path(shell_file or Path(os.environ.get("ZDOTDIR", Path.home())) / ".zshrc").expanduser().resolve()
     archive = Path(backup_dir or Path.home() / "Archive" / "claude-auto-model")
     script = Path(__file__).resolve().with_name("claude-auto-model.zsh")
     if not script.is_file():

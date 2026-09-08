@@ -28,10 +28,34 @@ class AppTests(unittest.TestCase):
 
     def test_permission_requires_explicit_yes(self):
         output = io.StringIO()
-        ui = self.app.Terminal(io.StringIO("yes\n"), output, output, interactive=True)
-        result = ui.permission({"tool_name": "Bash", "input": {"command": "echo example"}})
+        ui = self.app.Terminal(io.StringIO("yes abc123\n"), output, output, interactive=True)
+        with patch("auto_model.secrets.token_hex", return_value="abc123"):
+            result = ui.permission({"tool_name": "Bash", "input": {"command": "echo example"}})
         self.assertEqual(result, {"behavior": "allow", "updatedInput": {"command": "echo example"}})
         self.assertIn("echo example", output.getvalue())
+
+    def test_typeahead_yes_cannot_approve_a_later_action(self):
+        ui = self.app.Terminal(io.StringIO("yes\n"), io.StringIO(), io.StringIO(), interactive=True)
+        self.assertEqual(ui.permission({"tool_name":"Bash", "input":{"command":"publish"}})["behavior"], "deny")
+
+    def test_compaction_replaces_context_estimate_but_child_usage_does_not(self):
+        ui = self.app.Terminal(io.StringIO(), io.StringIO(), io.StringIO())
+        for count in (200000, 5000):
+            ui.event({"type":"assistant", "message":{"usage":{"input_tokens":count}, "content":[]}})
+        ui.event({"type":"assistant", "parent_tool_use_id":"child", "message":{"usage":{"input_tokens":5}, "content":[]}})
+        self.assertEqual(ui.context_tokens, 5000)
+
+    def test_piped_document_is_kept_with_positional_instruction(self):
+        from test_transport import PEER
+        import json
+        import sys
+        output = io.StringIO()
+        with patch("auto_model.launcher", return_value=[sys.executable, "-u", "-c", PEER]), \
+             patch("auto_model.verify_route", return_value={"model":"sonnet", "effort":"high"}), \
+             patch("sys.stdin", io.StringIO("CRITICAL_DOCUMENT")), patch("sys.stdout", output):
+            self.app.main(["-p", "--no-session-persistence", "--model", "sonnet", "--effort", "high", "Summarize input"])
+        self.assertIn("Summarize input", output.getvalue())
+        self.assertIn("CRITICAL_DOCUMENT", output.getvalue())
 
     def test_unknown_interaction_and_canceled_permission_are_denied(self):
         ui = self.app.Terminal(io.StringIO("yes\n"), io.StringIO(), io.StringIO(), interactive=True)

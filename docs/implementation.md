@@ -65,7 +65,7 @@ A real Agent invocation for a typo correction selected the Sonnet/low definition
 and completed. Reproduction commands are in the README. These synthetic checks
 prove routing mechanics, not task quality or a percentage saving.
 
-Final offline checks: 91 stdlib unittest tests, Python compilation, zsh syntax,
+Initial implementation checks: 91 stdlib unittest tests, Python compilation, zsh syntax,
 and git whitespace checks. Later review fixes cover correlated background
 results, replayed and cancelled approvals, unknown interactions, and environment
 pin release. Those failures were reproduced offline before patching.
@@ -78,7 +78,35 @@ upstream and reported as an error without model-hopping retries. No claim is mad
 that routing prevents upstream refusals, outages, rate limits or poor answers.
 
 The local shell installer archives the old source configuration and leaves
-provider files untouched. No remote push or deployment is part of this handoff.
+provider files untouched. The implementation is published on the repository's
+`master` branch. Updating code is separate from changing provider configuration.
+
+## Public beta hardening, 2026-09-08
+
+The follow-on audit reproduced and fixed canonical-mode long-paste stalls,
+blocking partial pastes, dropped piped documents when a positional instruction
+was present, typeahead approval ambiguity, shrinking context after compaction,
+shutdown blocked by surviving subprocess descendants, and ignored `ZDOTDIR`.
+Regression tests exercise real PTYs and subprocesses as well as routing policy.
+
+Independent quality floors prevent an accidental XS classification from sending
+unbounded work to Haiku. Recognized deepest-reasoning requests elevate to Fable;
+uncertain follow-ups retain both the previous model and effort. Manual choices
+remain authoritative. These safeguards deliberately favor quality over the
+lowest possible price and cannot prove perfect intent detection.
+
+The fixed 32-case development corpus and all three paid evaluation reports are checked
+in. The initial run had five conservative over-routes and one safe timeout; after
+correction the same corpus passed 32/32. This does not establish general accuracy
+or savings. See the README for cost, latency, public-beta limitations and commands
+to repeat the tests. Repository images are conceptual artwork, not test evidence.
+
+Independent review additionally reproduced an old low effort overriding a new
+escalation, model-discussion text becoming a manual override, unrelated negation
+suppressing a security floor, and per-chunk waits slowing large queued pastes.
+All were fixed with regressions. The final suite passes 126 tests and the reviewed
+live run again passed 32/32. Real engine checks also repeated the five-model
+same-session test, subagent routing, resume, long paste, and explicit permission.
 
 ## Deliberate limits
 

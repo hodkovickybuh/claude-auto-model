@@ -5,7 +5,7 @@ import re
 import time
 import unicodedata
 
-from routing import FAMILIES, TIERS, Route, _family, _reason, choose_route
+from routing import EFFORTS, FAMILIES, TIERS, Route, _family, _reason, choose_route
 
 
 def _words(prompt):
@@ -101,8 +101,8 @@ class TaskState:
                 tier = max((previous.tier, proposal.tier), key=list(TIERS).index)
                 proposal = replace(proposal, tier=tier, model=previous.model,
                                    reason=_reason("active task continuity", proposal.reason))
-            if (status_prompt(prompt) or continuation_prompt(prompt) or intent == "status") and not proposal.effort_explicit:
-                proposal = replace(proposal, effort=previous.effort)
+            if (status_prompt(prompt) or continuation_prompt(prompt) or intent in ("status", "uncertain")) and not proposal.effort_explicit:
+                proposal = replace(proposal, effort=max((previous.effort, proposal.effort), key=EFFORTS.index))
 
         old_rates, new_rates = _rates(previous.model), _rates(proposal.model)
         if (not proposal.model_explicit and not proposal.effort_explicit

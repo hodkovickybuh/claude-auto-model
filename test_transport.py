@@ -1,8 +1,12 @@
 """Offline process-boundary checks. Run: python3 -m unittest -v."""
 import importlib.util
 import json
+import os
+import signal
 import sys
+import threading
 import unittest
+from unittest.mock import patch
 
 
 # A tiny executable peer, not a mocked Engine: catches ordering, framing and EOF.
@@ -112,6 +116,133 @@ class TransportTests(unittest.TestCase):
         self.engine.canceled_requests.add("permission-one")
         self.engine.request("replay")
         self.assertEqual(seen, [])
+
+    @unittest.skipUnless(hasattr(os, "fork"), "POSIX process groups required")
+    def test_close_kills_stubborn_descendant_even_if_leader_exits_first(self):
+        peer = r'''
+import json, os, signal, sys, time
+ready_read, ready_write = os.pipe()
+if os.fork() == 0:
+    os.close(ready_read)
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    os.write(ready_write, b"ready")
+    os.close(ready_write)
+    time.sleep(20)
+    os._exit(0)
+os.close(ready_write)
+os.read(ready_read, 5)
+os.close(ready_read)
+print(json.dumps({"type":"system", "pgid":os.getpgrp()}), flush=True)
+if sys.argv[1] == "exited":
+    os._exit(0)
+time.sleep(20)
+'''
+        for leader in ("running", "exited", "sigkill-denied"):
+            with self.subTest(leader=leader):
+                engine = self.Engine([sys.executable, "-u", "-c", peer, leader])
+                errors = []
+                real_killpg = os.killpg
+
+                def kill_group(pgid, sig):
+                    if leader == "sigkill-denied" and pgid == engine.process.pid and sig == signal.SIGKILL:
+                        raise PermissionError("fixture: live descendant cannot be signaled")
+                    return real_killpg(pgid, sig)
+
+                def close():
+                    try:
+                        with patch("transport.os.killpg", side_effect=kill_group):
+                            engine.close()
+                    except BaseException as exc:
+                        errors.append(exc)
+
+                closer = threading.Thread(target=close, daemon=True)
+                try:
+                    ready = engine._next(2)
+                    self.assertEqual(ready["pgid"], engine.process.pid)
+                    self.assertNotEqual(ready["pgid"], os.getpgrp())
+                    if leader == "exited":
+                        engine.process.wait(timeout=2)
+                    closer.start()
+                    closer.join(2)
+                    self.assertFalse(closer.is_alive(), "close blocked on descendant's stdout")
+                    if leader == "sigkill-denied":
+                        self.assertEqual(len(errors), 1)
+                        self.assertIsInstance(errors[0], PermissionError)
+                        self.assertTrue(engine.reader.is_alive())
+                    else:
+                        self.assertEqual(errors, [])
+                        self.assertFalse(engine.reader.is_alive(), "descendant still holds stdout open")
+                finally:
+                    # Only this Engine's newly created process group is targeted.
+                    try:
+                        real_killpg(engine.process.pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                    engine.process.wait(timeout=2)
+                    if closer.ident is None:
+                        closer.start()
+                    closer.join(2)
+                    self.assertFalse(closer.is_alive(), "fixture cleanup did not finish")
+                    engine.reader.join(2)
+                    engine.process.stdin.close()
+                    engine.process.stdout.close()
+
+    def test_repeated_close_does_not_signal_a_reusable_process_group_id(self):
+        self.engine.close()
+        with patch("transport.os.killpg", side_effect=AssertionError("closed group signaled again")):
+            self.engine.close()
+
+    @unittest.skipUnless(hasattr(os, "fork"), "POSIX process groups required")
+    def test_close_handles_zombie_only_group_after_leader_is_reaped(self):
+        peer = r'''
+import json, os, time
+leader = os.getpid()
+ready_read, ready_write = os.pipe()
+reaper = os.fork()
+if reaper == 0:
+    # Keep a zombie in the Engine group after its leader has been reaped.
+    os.setpgid(0, 0)
+    worker = os.fork()
+    if worker == 0:
+        os.setpgid(0, leader)
+        os.write(ready_write, b"ready")
+        os._exit(0)
+    os.close(1)
+    time.sleep(20)
+    os.waitpid(worker, 0)
+    os._exit(0)
+print(json.dumps({"type":"system", "reaper":reaper}), flush=True)
+os.close(ready_write)
+os.read(ready_read, 5)
+os._exit(0)
+'''
+        engine = self.Engine([sys.executable, "-u", "-c", peer])
+        reaper = None
+        try:
+            reaper = engine._next(2)["reaper"]
+            engine.process.wait(timeout=2)
+            engine.reader.join(2)
+            self.assertFalse(engine.reader.is_alive())
+            try:
+                engine.close()
+            except PermissionError as exc:
+                self.fail(f"zombie-only group prevented close: {exc}")
+            self.assertTrue(engine.process.stdin.closed)
+            self.assertTrue(engine.process.stdout.closed)
+        finally:
+            if reaper is not None:
+                try:
+                    os.kill(reaper, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            try:
+                os.killpg(engine.process.pid, signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass
+            engine.process.wait(timeout=2)
+            engine.reader.join(2)
+            engine.process.stdin.close()
+            engine.process.stdout.close()
 
 
 if __name__ == "__main__":

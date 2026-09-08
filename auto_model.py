@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import re
 import select
+import secrets
 import shutil
 import subprocess
 import sys
@@ -114,17 +115,21 @@ class Terminal:
         self.queued = deque()
         self.current_route = "initializing"
         self.reported_cost = None
+        self.reader = None
+        self.bracketed = False
 
     def poll_input(self):
         from continuity import status_prompt
         if not self.interactive or self.in_permission:
             return
-        if not select.select([self.input], [], [], 0)[0]:
+        if not self.reader and not select.select([self.input], [], [], 0)[0]:
             return
         try:
-            line = self.ask("", queued=False)
+            line = self.reader.read_line() if self.reader else self.ask("", queued=False)
         except EOFError:
             self.interactive = False
+            return
+        if line is None:
             return
         if status_prompt(line) or line == "/status":
             self.note(f"Still running on {self.current_route}. No model switch or extra inference.")
@@ -138,12 +143,18 @@ class Terminal:
         print(message, file=self.error, flush=True)
 
     def __enter__(self):
+        if self.interactive and self.input.isatty():
+            from terminal_input import TTYInput
+            self.reader = TTYInput(self.input, self.error).__enter__()
         if self.interactive and self.error.isatty():
             print("\x1b[?2004h", file=self.error, end="", flush=True)
+            self.bracketed = True
         return self
 
     def __exit__(self, *args):
-        if self.interactive and self.error.isatty():
+        if self.reader:
+            self.reader.__exit__(*args)
+        if self.bracketed:
             print("\x1b[?2004l", file=self.error, end="", flush=True)
 
     def ask(self, prompt, *, queued=True):
@@ -152,6 +163,14 @@ class Terminal:
         if queued and self.queued and not self.in_permission:
             return self.queued.popleft()
         print(prompt, file=self.error, end="", flush=True)
+        if self.reader:
+            while True:
+                line = self.reader.read_line(canceled=self.permission_canceled if self.in_permission else lambda: False)
+                if line is not None:
+                    return line
+                if self.idle and not self.in_permission:
+                    self.idle()
+                select.select([self.input], [], [], 0.15)
         if self.in_permission and self.input.isatty():
             while not select.select([self.input], [], [], 0.15)[0]:
                 if self.permission_canceled():
@@ -183,6 +202,7 @@ class Terminal:
         self.note(f"\nPermission requested: {name}\n{json.dumps(data, ensure_ascii=False, indent=2)}")
         self.in_permission = True
         self.permission_canceled = request.get("_is_canceled", lambda: False)
+        confirmation = "yes " + secrets.token_hex(3)
         try:
             if name == "AskUserQuestion":
                 answers = {}
@@ -197,8 +217,10 @@ class Terminal:
                     if answer.isdigit() and 1 <= int(answer) <= len(options):
                         answer = options[int(answer) - 1]["label"]
                     answers[question["question"]] = answer
-                return {"behavior": "allow", "updatedInput": {**data, "answers": answers}}
-            if self.ask("Allow this exact action? Type yes: ").strip().lower() == "yes":
+                if self.ask(f"Confirm these answers. Type {confirmation}: ").strip().lower() == confirmation:
+                    return {"behavior": "allow", "updatedInput": {**data, "answers": answers}}
+                return {"behavior": "deny", "message": "Answers were not confirmed"}
+            if self.ask(f"Allow this exact action? Type {confirmation}: ").strip().lower() == confirmation:
                 return {"behavior": "allow", "updatedInput": data}
         except (EOFError, KeyboardInterrupt):
             pass
@@ -258,7 +280,7 @@ class Terminal:
         count = sum(usage.get(key, 0) or 0 for key in
                     ("input_tokens", "cache_read_input_tokens", "cache_creation_input_tokens", "output_tokens"))
         if count:
-            self.context_tokens = max(self.context_tokens, count)
+            self.context_tokens = count
 
 
 def handle_request(request, ui, classifier):
@@ -409,8 +431,9 @@ def main(argv=None):
         effort_lock = None
     prompt = args.prompt
     single = args.print_mode or not ui.interactive
-    if single and prompt is None:
-        prompt = sys.stdin.read()
+    if single and (prompt is None or not ui.interactive):
+        supplied = sys.stdin.read()
+        prompt = "\n\n".join(part for part in (prompt, supplied) if part)
     if single and not prompt:
         raise ValueError("Provide a prompt or pipe one on stdin")
     history = []

@@ -162,15 +162,36 @@ class Engine:
         return result
 
     def close(self):
-        if self.process.poll() is None:
+        if self.process.stdin.closed and self.process.stdout.closed:
+            return
+        self.process.poll()
+        try:
+            os.killpg(self.process.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+        except PermissionError:
+            # macOS can report EPERM for a group containing only an unreaped
+            # zombie if the leader exits between poll() and killpg().
+            if self.process.poll() is None:
+                raise
+        try:
+            self.process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            pass
+        finally:
+            # start_new_session makes this PID our group ID, even after its
+            # leader exits. Kill remaining descendants before closing stdout.
             try:
-                os.killpg(self.process.pid, signal.SIGTERM)
-                self.process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
                 os.killpg(self.process.pid, signal.SIGKILL)
-                self.process.wait(timeout=5)
             except ProcessLookupError:
                 pass
+            except PermissionError:
+                # A zombie-only group can remain after the leader is reaped.
+                # Require EOF too; a live, unsignalable stdout holder is an error.
+                self.reader.join(timeout=1)
+                if self.process.poll() is None or self.reader.is_alive():
+                    raise
+        self.process.wait(timeout=5)
         for stream in (self.process.stdin, self.process.stdout):
             if stream:
                 stream.close()

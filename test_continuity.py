@@ -52,6 +52,20 @@ class ContinuityTests(unittest.TestCase):
             self.state.observe("Also handle duplicate deliveries", selected, now=1000)
             self.assertEqual(self.state.task, "Finish the distributed ledger")
 
+    def test_uncertain_followup_cannot_lower_active_effort(self):
+        selected = self.state.select("What about the other issue?", Route("XS", "haiku", "low", "Uncertain"), now=1000)
+        self.assertEqual((selected.model, selected.effort), ("fable", "xhigh"))
+
+    def test_uncertainty_preserves_upgraded_effort_not_just_old_effort(self):
+        from routing import quality_guard
+        for prompt in ["Ultrathink. Design the crash recovery protocol.",
+                       "Use Fable 5.1. Solve the concurrency bug."]:
+            state = self.module.TaskState(Route("S", "sonnet", "low", "Old edit"), "Fix typo", 100)
+            proposal = quality_guard(prompt, Route("S", "sonnet", "low", "Uncertain"))
+            selected = state.select(prompt, proposal, now=1000)
+            self.assertIn("fable", selected.model)
+            self.assertEqual(selected.effort, "xhigh")
+
     def test_genuine_unrelated_task_replaces_anchor_at_small_context(self):
         for prompt, intent in [("What does pwd do?", "new_task"), ("new task: explain pwd", "uncertain")]:
             state = self.module.TaskState(self.active, "Original task", 100)
