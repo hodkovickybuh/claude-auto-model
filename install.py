@@ -50,7 +50,7 @@ def install(shell_file=None, backup_dir=None):
         os.fsync(staged.fileno())
     os.chmod(staged.name, mode)
     os.replace(staged.name, target)
-    print(f"Installed. New zsh terminals route plain claude automatically. Original UI: _claude_stock")
+    print("Installed optional ca commands. Plain claude keeps its native launcher and UI.")
     if backup:
         print(f"Previous shell configuration archived at {backup}")
     return backup

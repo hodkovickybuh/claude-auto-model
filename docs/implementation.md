@@ -1,5 +1,18 @@
 # Automatic routing implementation
 
+## Correction: preserve native Claude Code
+
+Pavel explicitly rejected replacing Claude Code's terminal interface. Passing
+the controller's tests did not satisfy that product requirement. Plain `claude`
+now keeps its original launcher. Existing controller code remains available only
+through `ca` or direct Python execution. Re-sourcing repairs a previous router
+takeover without overwriting unrelated launcher customizations.
+
+The notes below describe the historical controller implementation, not a
+completed native-interface integration. Native per-prompt model and effort
+routing remains unresolved. Do not infer support from the SDK control protocol
+or claim a different interface is equivalent to the requested one.
+
 Recovered requirements from Pavel's September 7 conversation:
 
 - Select the main model and effort before every user task, including follow-ups.

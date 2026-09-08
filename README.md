@@ -2,17 +2,40 @@
 
 ![claude-auto-model, task-aware model routing for Claude Code](assets/cover.png)
 
-Automatically select Claude Code's model and effort before every task in the
-same conversation. Start `claude` once and keep chatting.
+**Native-UI requirement is not implemented.** Plain `claude` runs normal Claude
+Code, without this project's model router. The existing controller is retained
+as the explicit `ca` command, not a replacement for the normal launcher.
+
+The intended product is automatic model and effort selection inside the unchanged
+Claude Code terminal. The current experimental implementation does not satisfy
+that interface requirement and should not be presented as a finished solution.
 
 This version replaces the original launch-only zsh classifier with a small
 Python terminal controller. It runs the real Claude Code engine continuously and
 uses its supported `set_model` and `apply_flag_settings` controls. The active
 model and effort are verified before your prompt is sent.
 
-**Public beta.** Real mid-session switching is implemented and tested. Routing
+**Opt-in experiment.** Real mid-session switching in the separate controller is tested. Routing
 judgment is probabilistic, account access still applies, and savings are not yet
 measured on real workloads. This is an independent project, not an Anthropic product.
+
+## Native integration status
+
+Checked against Claude Code 2.1.263 on 2026-09-08:
+
+- Editing `model`, `effortLevel` or `modelSettings` from a hook cannot change a
+  running session. These settings are read at startup, unlike many other settings.
+  [Settings reload behavior](https://code.claude.com/docs/en/settings#when-edits-take-effect).
+- `UserPromptSubmit` cannot return model or effort overrides. `PreModelSwitch`
+  governs a switch already requested, not automatic selection before a prompt.
+  [Hook controls](https://code.claude.com/docs/en/hooks).
+- Native skills support turn-scoped `model` and `effort` overrides. This is a
+  possible integration direction, but model-selected invocation is not guaranteed
+  before the first request or on every prompt. It has not been implemented here.
+  [Skill frontmatter](https://code.claude.com/docs/en/skills#frontmatter-reference).
+- Remote Control supports official clients, but no documented public local
+  automation endpoint was found. SDK stream controls alone do not attach to the
+  native terminal. No private-protocol integration or terminal input injection is installed.
 
 ## Install
 
@@ -26,12 +49,25 @@ python3 -m unittest discover -v
 python3 install.py
 ```
 
-Open a new zsh terminal, then run `claude` normally. The installer archives your
+Open a new zsh terminal. `claude` keeps its native interface, flags and launcher.
+Only `ca` starts the experimental plain-text controller described below.
+The installer archives your
 previous `.zshrc`, replaces the old router's source line if present, and leaves
 unrelated shell configuration intact. Re-running it is idempotent.
 If `ZDOTDIR` is set, its `.zshrc` is used. `--shell-file PATH` overrides that choice.
 Keep this checkout in place: the shell sources it directly. Updating the checkout
 updates new routed sessions; existing sessions keep their loaded code.
+
+If an older version took over `claude` in an already-open shell, exit its
+controller with `/quit`, then source the updated integration file once:
+
+```sh
+source /path/to/claude-auto-model/claude-auto-model.zsh
+claude
+```
+
+Re-sourcing restores only the previous router takeover, not unrelated user
+functions or aliases. Opening a new terminal also picks up the correction.
 
 Without installing:
 
@@ -44,10 +80,10 @@ The interface is plain text. Claude retains its session, tools, project
 instructions, hooks, plugins, MCPs, and normal permission rules. It is **not
 Claude's original full-screen terminal UI**. Native pickers, image pasting,
 terminal shortcuts, and other UI-only features remain available through
-`_claude_stock` or `ca --native`. This cannot attach automatic routing to an
+normal `claude`, `_claude_stock` or `ca --native`. This cannot attach automatic routing to an
 already-running original terminal session.
 
-## Routing
+## Experimental controller routing (`ca` only)
 
 ![A task passes through context and quality checks, then model and effort selection, into Claude Code. A hard task uses Fable, a status check makes no model call, and a continuation keeps Fable.](assets/routing-flow.png)
 
@@ -121,10 +157,10 @@ can still act after submission and are outside this routing check.
 ## Manual choices
 
 ```sh
-claude --model opus --effort max
-claude "your task" --model opus --effort max
-claude --continue
-claude --resume SESSION_ID
+ca --model opus --effort max
+ca "your task" --model opus --effort max
+ca --continue
+ca --resume SESSION_ID
 ```
 
 Model and effort flags are independent session pins. Both pinned means no
@@ -252,7 +288,7 @@ inference latency remain a material usability limitation for tiny tasks.
 Print mode keeps routing diagnostics on stderr:
 
 ```sh
-claude -p --output-format json "your task"
+ca -p --output-format json "your task"
 printf 'your task' | python3 auto_model.py -p
 printf 'document contents' | python3 auto_model.py -p "Summarize this document"
 ```

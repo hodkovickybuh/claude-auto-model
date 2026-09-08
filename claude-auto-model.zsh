@@ -1,5 +1,12 @@
-# Source this file from zsh to route interactive tasks through the controller.
+# Optional controller commands. Plain claude keeps its native launcher and UI.
 typeset -g _CA_ROOT="${${(%):-%N}:A:h}"
+
+# Undo only this project's previous takeover when re-sourced in an existing shell.
+# zsh's function-body round trip removes spaces around case-pattern separators.
+if (( $+functions[_claude_stock] && $+functions[ca] && $+functions[claude] )) &&
+   [[ "${functions[claude]// | /|}" == "${functions[ca]// | /|}" ]]; then
+  functions[claude]=$functions[_claude_stock]
+fi
 
 if ! (( $+functions[_claude_stock] )); then
   if (( $+functions[claude] )); then
@@ -23,12 +30,6 @@ function ca {
       ;;
   esac
 }
-
-if (( $+aliases[claude] )); then
-  print -ru2 -- "claude-auto-model: alias 'claude' left unchanged; use ca for routing or _claude_stock for the original launcher."
-else
-  functions[claude]=$functions[ca]
-fi
 
 function ca-test {
   (cd -- "$_CA_ROOT" && python3 -m unittest discover -v)
